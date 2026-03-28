@@ -61,12 +61,21 @@ const Index = () => {
             </div>
           </div>
           {analysis && (
-            <button
-              onClick={handleReset}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              New Analysis
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => { exportAnalysisPdf(analysis); toast.success("PDF downloaded!"); }}
+                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Export PDF
+              </button>
+              <button
+                onClick={handleReset}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                New Analysis
+              </button>
+            </div>
           )}
         </div>
       </header>
