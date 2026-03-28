@@ -48,7 +48,7 @@ const Index = () => {
       title,
       paper_text: paperText,
       analysis: analysis as unknown as Record<string, unknown>,
-    });
+    } as any);
     if (error) {
       toast.error("Failed to save analysis");
     } else {
