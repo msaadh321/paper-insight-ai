@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen } from "lucide-react";
+import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download } from "lucide-react";
 import { PaperUpload } from "@/components/PaperUpload";
 import { SummarySection } from "@/components/SummarySection";
 import { InsightsSection } from "@/components/InsightsSection";
 import { AnalysisCharts } from "@/components/AnalysisCharts";
 import { QASection } from "@/components/QASection";
 import { analyzePaper } from "@/lib/api";
+import { exportAnalysisPdf } from "@/lib/exportPdf";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 
