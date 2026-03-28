@@ -92,7 +92,7 @@ Question: ${question}`;
                   type: "object",
                   properties: {
                     name: { type: "string" },
-                    type: { type: "string", enum: ["person", "organization", "concept", "method"] }
+                    type: { type: "string", enum: ["person", "organization", "concept", "method", "dataset", "metric"] }
                   },
                   required: ["name", "type"]
                 }
