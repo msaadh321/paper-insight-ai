@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download } from "lucide-react";
+import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download, Save, LogIn, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { PaperUpload } from "@/components/PaperUpload";
 import { SummarySection } from "@/components/SummarySection";
 import { InsightsSection } from "@/components/InsightsSection";
 import { AnalysisCharts } from "@/components/AnalysisCharts";
 import { QASection } from "@/components/QASection";
+import { SavedAnalyses } from "@/components/SavedAnalyses";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { analyzePaper } from "@/lib/api";
 import { exportAnalysisPdf } from "@/lib/exportPdf";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 
@@ -17,6 +22,8 @@ const Index = () => {
   const [analysis, setAnalysis] = useState<PaperAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("summary");
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleAnalyze = async (text: string) => {
     setPaperText(text);
@@ -31,6 +38,28 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSave = async () => {
+    if (!user || !analysis || !paperText) return;
+    const title = analysis.shortSummary.slice(0, 80) || "Untitled Analysis";
+    const { error } = await supabase.from("saved_analyses").insert({
+      user_id: user.id,
+      title,
+      paper_text: paperText,
+      analysis: analysis as unknown as Record<string, unknown>,
+    });
+    if (error) {
+      toast.error("Failed to save analysis");
+    } else {
+      toast.success("Analysis saved!");
+    }
+  };
+
+  const handleLoadSaved = (text: string, savedAnalysis: PaperAnalysis) => {
+    setPaperText(text);
+    setAnalysis(savedAnalysis);
+    setActiveTab("summary");
   };
 
   const handleReset = () => {
@@ -48,7 +77,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -60,23 +88,52 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">AI-Powered Paper Analysis</p>
             </div>
           </div>
-          {analysis && (
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {analysis && (
+              <>
+                <button
+                  onClick={() => { exportAnalysisPdf(analysis); toast.success("PDF downloaded!"); }}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">Export PDF</span>
+                </button>
+                {user && (
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span className="hidden sm:inline">Save</span>
+                  </button>
+                )}
+                <button
+                  onClick={handleReset}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  New Analysis
+                </button>
+              </>
+            )}
+            <ThemeToggle />
+            {user ? (
               <button
-                onClick={() => { exportAnalysisPdf(analysis); toast.success("PDF downloaded!"); }}
+                onClick={() => { signOut(); toast.success("Signed out"); }}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/auth")}
                 className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
               >
-                <Download className="h-4 w-4" />
-                Export PDF
+                <LogIn className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign In</span>
               </button>
-              <button
-                onClick={handleReset}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                New Analysis
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
 
@@ -88,10 +145,11 @@ const Index = () => {
                 Understand Papers <span className="text-gradient-gold">Instantly</span>
               </h2>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                Upload any research paper and get AI-powered summaries, key insights, visual analytics, and an interactive Q&A — all in seconds.
+                Paste any research paper and get AI-powered summaries, key insights, visual analytics, and an interactive Q&A — all in seconds.
               </p>
             </div>
             <PaperUpload onTextReady={handleAnalyze} />
+            {user && <SavedAnalyses onLoad={handleLoadSaved} />}
           </div>
         )}
 
@@ -105,7 +163,6 @@ const Index = () => {
 
         {analysis && !loading && (
           <div className="space-y-6 animate-fade-in">
-            {/* Tab Navigation */}
             <div className="flex gap-1 p-1 bg-accent rounded-xl">
               {tabs.map(({ key, label, icon: Icon }) => (
                 <button
@@ -123,7 +180,6 @@ const Index = () => {
               ))}
             </div>
 
-            {/* Tab Content */}
             {activeTab === "summary" && <SummarySection analysis={analysis} />}
             {activeTab === "insights" && <InsightsSection analysis={analysis} />}
             {activeTab === "charts" && <AnalysisCharts analysis={analysis} />}
