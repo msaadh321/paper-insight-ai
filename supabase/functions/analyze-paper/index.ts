@@ -20,30 +20,43 @@ serve(async (req) => {
       });
     }
 
-    const truncatedText = paperText.slice(0, 15000);
+    const truncatedText = paperText.slice(0, 25000);
 
     let systemPrompt = "";
     let userPrompt = "";
 
     if (action === "analyze") {
-      systemPrompt = `You are an expert academic research paper analyst. You will analyze a research paper and return structured JSON output. Be thorough and accurate.`;
-      userPrompt = `Analyze the following research paper and return a JSON object with these exact keys:
-- "shortSummary": A concise 3-5 sentence summary
-- "detailedSummary": A comprehensive summary covering all major points (2-3 paragraphs)
-- "abstract": The paper's abstract or a generated one if not found
-- "introduction": Key points from the introduction
-- "methodology": Research methodology used
-- "results": Key findings and results
-- "conclusion": Main conclusions
-- "keywords": Array of 8-12 important keywords/terms
-- "entities": Array of objects with "name" and "type" (person/organization/concept/method) for named entities found
-- "topicDistribution": Array of objects with "topic" and "percentage" (numbers summing to 100) for main topics covered
+      systemPrompt = `You are a world-class academic research paper analyst with deep expertise across all scientific disciplines. Your analysis must be:
+- **Thorough**: Extract every significant detail, don't generalize or skip nuances.
+- **Structured**: Organize information logically with clear sections.
+- **Accurate**: Only state what the paper actually claims; distinguish between findings and speculation.
+- **Insightful**: Identify implications, novelty, and connections the paper makes.
+- **Well-written**: Use clear, professional academic language.`;
+
+      userPrompt = `Perform a comprehensive analysis of the following research paper. For each field, provide substantial, detailed content — not just a sentence or two.
+
+Return a JSON object with these keys:
+- "shortSummary": A clear, informative 4-6 sentence summary covering the paper's objective, methodology, key findings, and significance. Write it so someone unfamiliar with the field can understand.
+- "detailedSummary": A thorough 3-4 paragraph summary that covers: (1) the research problem and motivation, (2) the approach/methodology in detail, (3) key results with specific data points or findings mentioned in the paper, (4) implications and contributions to the field.
+- "abstract": The paper's original abstract if identifiable, otherwise generate a comprehensive abstract (150-250 words).
+- "introduction": Summarize the introduction covering: research gap, motivation, objectives, and how the paper is organized. (2-3 detailed paragraphs)
+- "methodology": Describe the research methodology in detail: study design, data collection, models/algorithms used, experimental setup, evaluation metrics. (2-3 detailed paragraphs)
+- "results": Present key findings with specific numbers, comparisons, and statistical significance where available. Describe tables/figures findings. (2-3 detailed paragraphs)
+- "conclusion": Main conclusions, limitations acknowledged by authors, and future work directions. (1-2 detailed paragraphs)
+- "keywords": Array of 10-15 specific technical keywords and key phrases from the paper (not generic terms).
+- "entities": Array of 10-20 objects with "name" and "type" (person/organization/concept/method/dataset/metric) for important named entities.
+- "topicDistribution": Array of 5-8 objects with "topic" (specific topic name) and "percentage" (numbers summing to 100) representing the paper's thematic coverage.
 
 Paper text:
 ${truncatedText}`;
     } else if (action === "qa") {
-      systemPrompt = `You are an expert academic research assistant. Answer questions about the given paper accurately and concisely, citing specific parts when possible.`;
-      userPrompt = `Based on this research paper, answer the following question.
+      systemPrompt = `You are an expert academic research assistant. When answering questions:
+- Be precise and cite specific sections, findings, or data from the paper.
+- If the paper doesn't contain enough information to answer, say so clearly.
+- Use markdown formatting for clarity: **bold** for emphasis, bullet points for lists, and code blocks for formulas.
+- Provide context and explain technical concepts when relevant.`;
+
+      userPrompt = `Based on the research paper below, provide a thorough and well-structured answer to the question. Reference specific parts of the paper when possible.
 
 Paper text:
 ${truncatedText}
