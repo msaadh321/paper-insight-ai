@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen } from "lucide-react";
+import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download } from "lucide-react";
 import { PaperUpload } from "@/components/PaperUpload";
 import { SummarySection } from "@/components/SummarySection";
 import { InsightsSection } from "@/components/InsightsSection";
 import { AnalysisCharts } from "@/components/AnalysisCharts";
 import { QASection } from "@/components/QASection";
 import { analyzePaper } from "@/lib/api";
+import { exportAnalysisPdf } from "@/lib/exportPdf";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 
@@ -60,12 +61,21 @@ const Index = () => {
             </div>
           </div>
           {analysis && (
-            <button
-              onClick={handleReset}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              New Analysis
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => { exportAnalysisPdf(analysis); toast.success("PDF downloaded!"); }}
+                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Export PDF
+              </button>
+              <button
+                onClick={handleReset}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                New Analysis
+              </button>
+            </div>
           )}
         </div>
       </header>
