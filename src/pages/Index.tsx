@@ -130,13 +130,22 @@ const Index = () => {
             )}
             <ThemeToggle />
             {user ? (
-              <button
-                onClick={() => { signOut(); toast.success("Signed out"); }}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
+              <>
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </button>
+                <button
+                  onClick={() => { signOut(); toast.success("Signed out"); }}
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => navigate("/auth")}
