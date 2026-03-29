@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download, Save, LogIn, LogOut, LayoutDashboard } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { PaperUpload } from "@/components/PaperUpload";
 import { SummarySection } from "@/components/SummarySection";
 import { InsightsSection } from "@/components/InsightsSection";
