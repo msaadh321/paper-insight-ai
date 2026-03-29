@@ -35,6 +35,8 @@ const Dashboard = () => {
   const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<{ display_name: string | null; email: string | null } | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
