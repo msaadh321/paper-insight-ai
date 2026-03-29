@@ -97,6 +97,7 @@ const Dashboard = () => {
     }
   };
 
+  const handleLoadAnalysis = (a: SavedAnalysis) => {
     navigate("/", { state: { paperText: a.paper_text, analysis: a.analysis } });
   };
 
