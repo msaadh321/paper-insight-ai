@@ -24,6 +24,19 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("summary");
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Load analysis from dashboard navigation
+  useEffect(() => {
+    const state = location.state as { paperText?: string; analysis?: PaperAnalysis } | null;
+    if (state?.paperText && state?.analysis) {
+      setPaperText(state.paperText);
+      setAnalysis(state.analysis);
+      setActiveTab("summary");
+      // Clear state so back/forward doesn't re-trigger
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleAnalyze = async (text: string) => {
     setPaperText(text);
