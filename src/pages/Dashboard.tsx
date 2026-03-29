@@ -16,6 +16,9 @@ import {
   User,
   Loader2,
   BookOpen,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 
 interface SavedAnalysis {
@@ -32,6 +35,8 @@ const Dashboard = () => {
   const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<{ display_name: string | null; email: string | null } | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -74,6 +79,21 @@ const Dashboard = () => {
     } else {
       setAnalyses((prev) => prev.filter((a) => a.id !== id));
       toast.success("Analysis deleted");
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!user || !newName.trim()) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: newName.trim() })
+      .eq("id", user.id);
+    if (error) {
+      toast.error("Failed to update name");
+    } else {
+      setProfile((prev) => prev ? { ...prev, display_name: newName.trim() } : prev);
+      toast.success("Display name updated!");
+      setEditingName(false);
     }
   };
 
@@ -139,9 +159,42 @@ const Dashboard = () => {
             <User className="h-8 w-8 text-primary" />
           </div>
           <div className="flex-1">
-            <h2 className="font-display text-xl text-foreground">
-              {profile?.display_name || "Researcher"}
-            </h2>
+            <div className="flex items-center gap-2">
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="bg-accent border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveName();
+                      if (e.key === "Escape") setEditingName(false);
+                    }}
+                  />
+                  <button onClick={handleSaveName} className="p-1 text-primary hover:text-primary/80">
+                    <Check className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => setEditingName(false)} className="p-1 text-muted-foreground hover:text-foreground">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h2 className="font-display text-xl text-foreground">
+                    {profile?.display_name || "Researcher"}
+                  </h2>
+                  <button
+                    onClick={() => { setNewName(profile?.display_name || ""); setEditingName(true); }}
+                    className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                    title="Edit display name"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
             <p className="text-xs text-muted-foreground mt-1">
               Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
