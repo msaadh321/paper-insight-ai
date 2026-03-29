@@ -16,6 +16,9 @@ import {
   User,
   Loader2,
   BookOpen,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 
 interface SavedAnalysis {
