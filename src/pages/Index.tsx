@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download, Save, LogIn, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Loader2, GraduationCap, BarChart3, MessageCircle, Sparkles, BookOpen, Download, Save, LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { PaperUpload } from "@/components/PaperUpload";
 import { SummarySection } from "@/components/SummarySection";
 import { InsightsSection } from "@/components/InsightsSection";
@@ -24,6 +24,19 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("summary");
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Load analysis from dashboard navigation
+  useEffect(() => {
+    const state = location.state as { paperText?: string; analysis?: PaperAnalysis } | null;
+    if (state?.paperText && state?.analysis) {
+      setPaperText(state.paperText);
+      setAnalysis(state.analysis);
+      setActiveTab("summary");
+      // Clear state so back/forward doesn't re-trigger
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleAnalyze = async (text: string) => {
     setPaperText(text);
@@ -117,13 +130,22 @@ const Index = () => {
             )}
             <ThemeToggle />
             {user ? (
-              <button
-                onClick={() => { signOut(); toast.success("Signed out"); }}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
+              <>
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </button>
+                <button
+                  onClick={() => { signOut(); toast.success("Signed out"); }}
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => navigate("/auth")}
