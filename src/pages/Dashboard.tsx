@@ -82,7 +82,21 @@ const Dashboard = () => {
     }
   };
 
-  const handleLoadAnalysis = (a: SavedAnalysis) => {
+  const handleSaveName = async () => {
+    if (!user || !newName.trim()) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: newName.trim() })
+      .eq("id", user.id);
+    if (error) {
+      toast.error("Failed to update name");
+    } else {
+      setProfile((prev) => prev ? { ...prev, display_name: newName.trim() } : prev);
+      toast.success("Display name updated!");
+      setEditingName(false);
+    }
+  };
+
     navigate("/", { state: { paperText: a.paper_text, analysis: a.analysis } });
   };
 
