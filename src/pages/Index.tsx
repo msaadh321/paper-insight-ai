@@ -29,12 +29,12 @@ const Index = () => {
 
   // Load analysis from dashboard navigation
   useEffect(() => {
-    const state = location.state as { paperText?: string; analysis?: PaperAnalysis } | null;
+    const state = location.state as { paperText?: string; analysis?: PaperAnalysis; analysisId?: string } | null;
     if (state?.paperText && state?.analysis) {
       setPaperText(state.paperText);
       setAnalysis(state.analysis);
+      setAnalysisId(state.analysisId || null);
       setActiveTab("summary");
-      // Clear state so back/forward doesn't re-trigger
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
