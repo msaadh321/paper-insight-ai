@@ -57,15 +57,16 @@ const Index = () => {
   const handleSave = async () => {
     if (!user || !analysis || !paperText) return;
     const title = analysis.shortSummary.slice(0, 80) || "Untitled Analysis";
-    const { error } = await supabase.from("saved_analyses").insert({
+    const { data: inserted, error } = await supabase.from("saved_analyses").insert({
       user_id: user.id,
       title,
       paper_text: paperText,
       analysis: analysis as unknown as Record<string, unknown>,
-    } as any);
+    } as any).select("id").single();
     if (error) {
       toast.error("Failed to save analysis");
     } else {
+      setAnalysisId((inserted as any)?.id || null);
       toast.success("Analysis saved!");
     }
   };
