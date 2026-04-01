@@ -20,6 +20,7 @@ type Tab = "summary" | "insights" | "charts" | "qa";
 const Index = () => {
   const [paperText, setPaperText] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<PaperAnalysis | null>(null);
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("summary");
   const { user, signOut } = useAuth();
