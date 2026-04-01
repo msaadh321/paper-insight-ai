@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { paperText, action, question } = await req.json();
+    const { paperText, action, question, targetLanguage } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -62,6 +62,10 @@ Paper text:
 ${truncatedText}
 
 Question: ${question}`;
+    } else if (action === "translate") {
+      const tLang = targetLanguage || "Urdu";
+      systemPrompt = `You are a professional translator. Translate the following text to ${tLang}. Maintain the structure, meaning, and academic tone. Return ONLY the translated text.`;
+      userPrompt = truncatedText;
     } else {
       return new Response(JSON.stringify({ error: "Invalid action" }), {
         status: 400,
@@ -167,6 +171,11 @@ Question: ${question}`;
       }
       return new Response(JSON.stringify({ error: "Failed to parse analysis" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else if (action === "translate") {
+      const translation = data.choices?.[0]?.message?.content || "";
+      return new Response(JSON.stringify({ translation }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } else {
       const answer = data.choices?.[0]?.message?.content || "No answer generated.";

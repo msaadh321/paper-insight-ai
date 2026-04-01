@@ -3,22 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AvatarUpload } from "@/components/AvatarUpload";
+import { CollectionsManager } from "@/components/CollectionsManager";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 import {
-  GraduationCap,
-  LogOut,
-  ArrowLeft,
-  Trash2,
-  FileText,
-  Clock,
-  BarChart3,
-  User,
-  Loader2,
-  BookOpen,
-  Pencil,
-  Check,
-  X,
+  GraduationCap, LogOut, ArrowLeft, Trash2, FileText, Clock,
+  BarChart3, Loader2, BookOpen, Pencil, Check, X,
 } from "lucide-react";
 
 interface SavedAnalysis {
@@ -34,49 +25,32 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<{ display_name: string | null; email: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ display_name: string | null; email: string | null; avatar_url: string | null } | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
+    if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
-
     const fetchData = async () => {
       const [analysesRes, profileRes] = await Promise.all([
-        supabase
-          .from("saved_analyses")
-          .select("*")
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("profiles")
-          .select("display_name, email")
-          .eq("id", user.id)
-          .single(),
+        supabase.from("saved_analyses").select("*").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("display_name, email, avatar_url").eq("id", user.id).single() as any,
       ]);
-
-      if (analysesRes.data) {
-        setAnalyses(analysesRes.data as unknown as SavedAnalysis[]);
-      }
-      if (profileRes.data) {
-        setProfile(profileRes.data);
-      }
+      if (analysesRes.data) setAnalyses(analysesRes.data as unknown as SavedAnalysis[]);
+      if (profileRes.data) setProfile(profileRes.data);
       setLoading(false);
     };
-
     fetchData();
   }, [user]);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("saved_analyses").delete().eq("id", id);
-    if (error) {
-      toast.error("Failed to delete");
-    } else {
+    if (error) toast.error("Failed to delete");
+    else {
       setAnalyses((prev) => prev.filter((a) => a.id !== id));
       toast.success("Analysis deleted");
     }
@@ -84,13 +58,9 @@ const Dashboard = () => {
 
   const handleSaveName = async () => {
     if (!user || !newName.trim()) return;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: newName.trim() })
-      .eq("id", user.id);
-    if (error) {
-      toast.error("Failed to update name");
-    } else {
+    const { error } = await supabase.from("profiles").update({ display_name: newName.trim() }).eq("id", user.id);
+    if (error) toast.error("Failed to update name");
+    else {
       setProfile((prev) => prev ? { ...prev, display_name: newName.trim() } : prev);
       toast.success("Display name updated!");
       setEditingName(false);
@@ -98,7 +68,7 @@ const Dashboard = () => {
   };
 
   const handleLoadAnalysis = (a: SavedAnalysis) => {
-    navigate("/", { state: { paperText: a.paper_text, analysis: a.analysis } });
+    navigate("/", { state: { paperText: a.paper_text, analysis: a.analysis, analysisId: a.id } });
   };
 
   if (authLoading || loading) {
@@ -110,17 +80,11 @@ const Dashboard = () => {
   }
 
   const totalAnalyses = analyses.length;
-  const totalKeywords = analyses.reduce(
-    (sum, a) => sum + (a.analysis?.keywords?.length || 0),
-    0
-  );
-  const latestDate = analyses.length
-    ? new Date(analyses[0].created_at).toLocaleDateString()
-    : "N/A";
+  const totalKeywords = analyses.reduce((sum, a) => sum + (a.analysis?.keywords?.length || 0), 0);
+  const latestDate = analyses.length ? new Date(analyses[0].created_at).toLocaleDateString() : "N/A";
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -133,18 +97,12 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-            >
+            <button onClick={() => navigate("/")} className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Analyze</span>
             </button>
             <ThemeToggle />
-            <button
-              onClick={() => { signOut(); toast.success("Signed out"); navigate("/auth"); }}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
+            <button onClick={() => { signOut(); toast.success("Signed out"); navigate("/auth"); }} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Sign Out</span>
             </button>
@@ -155,9 +113,11 @@ const Dashboard = () => {
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Profile Card */}
         <section className="glass-card rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <User className="h-8 w-8 text-primary" />
-          </div>
+          <AvatarUpload
+            avatarUrl={profile?.avatar_url || null}
+            displayName={profile?.display_name || null}
+            onUpload={(url) => setProfile((p) => p ? { ...p, avatar_url: url } : p)}
+          />
           <div className="flex-1">
             <div className="flex items-center gap-2">
               {editingName ? (
@@ -173,32 +133,20 @@ const Dashboard = () => {
                       if (e.key === "Escape") setEditingName(false);
                     }}
                   />
-                  <button onClick={handleSaveName} className="p-1 text-primary hover:text-primary/80">
-                    <Check className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => setEditingName(false)} className="p-1 text-muted-foreground hover:text-foreground">
-                    <X className="h-4 w-4" />
-                  </button>
+                  <button onClick={handleSaveName} className="p-1 text-primary hover:text-primary/80"><Check className="h-4 w-4" /></button>
+                  <button onClick={() => setEditingName(false)} className="p-1 text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
                 </div>
               ) : (
                 <>
-                  <h2 className="font-display text-xl text-foreground">
-                    {profile?.display_name || "Researcher"}
-                  </h2>
-                  <button
-                    onClick={() => { setNewName(profile?.display_name || ""); setEditingName(true); }}
-                    className="p-1 text-muted-foreground hover:text-primary transition-colors"
-                    title="Edit display name"
-                  >
+                  <h2 className="font-display text-xl text-foreground">{profile?.display_name || "Researcher"}</h2>
+                  <button onClick={() => { setNewName(profile?.display_name || ""); setEditingName(true); }} className="p-1 text-muted-foreground hover:text-primary transition-colors" title="Edit display name">
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                 </>
               )}
             </div>
             <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</p>
           </div>
         </section>
 
@@ -210,9 +158,7 @@ const Dashboard = () => {
             { icon: Clock, label: "Last Analysis", value: latestDate },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="glass-card rounded-xl p-5 flex items-center gap-4">
-              <div className="p-2.5 rounded-lg bg-primary/10">
-                <Icon className="h-5 w-5 text-primary" />
-              </div>
+              <div className="p-2.5 rounded-lg bg-primary/10"><Icon className="h-5 w-5 text-primary" /></div>
               <div>
                 <p className="text-2xl font-display text-foreground">{value}</p>
                 <p className="text-xs text-muted-foreground">{label}</p>
@@ -221,51 +167,36 @@ const Dashboard = () => {
           ))}
         </section>
 
+        {/* Collections */}
+        <section>
+          <CollectionsManager />
+        </section>
+
         {/* Saved Analyses */}
         <section>
           <h3 className="font-display text-lg text-foreground flex items-center gap-2 mb-4">
             <BookOpen className="h-5 w-5 text-primary" />
             Saved Analyses
           </h3>
-
           {analyses.length === 0 ? (
             <div className="glass-card rounded-xl p-10 text-center">
               <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
               <p className="text-foreground font-medium">No saved analyses yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Go to the analyzer, paste a paper, and save the results.
-              </p>
-              <button
-                onClick={() => navigate("/")}
-                className="mt-4 text-sm text-primary hover:underline font-medium"
-              >
-                Start analyzing →
-              </button>
+              <p className="text-sm text-muted-foreground mt-1">Go to the analyzer, paste a paper, and save the results.</p>
+              <button onClick={() => navigate("/")} className="mt-4 text-sm text-primary hover:underline font-medium">Start analyzing →</button>
             </div>
           ) : (
             <div className="grid gap-3">
               {analyses.map((a) => (
-                <div
-                  key={a.id}
-                  onClick={() => handleLoadAnalysis(a)}
-                  className="glass-card rounded-xl p-4 flex items-center justify-between group cursor-pointer hover:border-primary/30 transition-colors"
-                >
+                <div key={a.id} onClick={() => handleLoadAnalysis(a)} className="glass-card rounded-xl p-4 flex items-center justify-between group cursor-pointer hover:border-primary/30 transition-colors">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground truncate">{a.title}</p>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {new Date(a.created_at).toLocaleDateString()}
-                      </span>
-                      {a.analysis?.keywords?.length > 0 && (
-                        <span>{a.analysis.keywords.length} keywords</span>
-                      )}
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{new Date(a.created_at).toLocaleDateString()}</span>
+                      {a.analysis?.keywords?.length > 0 && <span>{a.analysis.keywords.length} keywords</span>}
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(a.id); }}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all"
-                  >
+                  <button onClick={(e) => { e.stopPropagation(); handleDelete(a.id); }} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>

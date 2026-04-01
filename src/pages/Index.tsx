@@ -20,6 +20,7 @@ type Tab = "summary" | "insights" | "charts" | "qa";
 const Index = () => {
   const [paperText, setPaperText] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<PaperAnalysis | null>(null);
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("summary");
   const { user, signOut } = useAuth();
@@ -28,12 +29,12 @@ const Index = () => {
 
   // Load analysis from dashboard navigation
   useEffect(() => {
-    const state = location.state as { paperText?: string; analysis?: PaperAnalysis } | null;
+    const state = location.state as { paperText?: string; analysis?: PaperAnalysis; analysisId?: string } | null;
     if (state?.paperText && state?.analysis) {
       setPaperText(state.paperText);
       setAnalysis(state.analysis);
+      setAnalysisId(state.analysisId || null);
       setActiveTab("summary");
-      // Clear state so back/forward doesn't re-trigger
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -56,15 +57,16 @@ const Index = () => {
   const handleSave = async () => {
     if (!user || !analysis || !paperText) return;
     const title = analysis.shortSummary.slice(0, 80) || "Untitled Analysis";
-    const { error } = await supabase.from("saved_analyses").insert({
+    const { data: inserted, error } = await supabase.from("saved_analyses").insert({
       user_id: user.id,
       title,
       paper_text: paperText,
       analysis: analysis as unknown as Record<string, unknown>,
-    } as any);
+    } as any).select("id").single();
     if (error) {
       toast.error("Failed to save analysis");
     } else {
+      setAnalysisId((inserted as any)?.id || null);
       toast.success("Analysis saved!");
     }
   };
@@ -78,6 +80,7 @@ const Index = () => {
   const handleReset = () => {
     setPaperText(null);
     setAnalysis(null);
+    setAnalysisId(null);
     setActiveTab("summary");
   };
 
@@ -203,7 +206,7 @@ const Index = () => {
             </div>
 
             {activeTab === "summary" && <SummarySection analysis={analysis} />}
-            {activeTab === "insights" && <InsightsSection analysis={analysis} />}
+            {activeTab === "insights" && <InsightsSection analysis={analysis} analysisId={analysisId || undefined} />}
             {activeTab === "charts" && <AnalysisCharts analysis={analysis} />}
             {activeTab === "qa" && paperText && <QASection paperText={paperText} />}
           </div>
