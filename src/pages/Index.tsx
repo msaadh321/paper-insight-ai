@@ -80,6 +80,7 @@ const Index = () => {
   const handleReset = () => {
     setPaperText(null);
     setAnalysis(null);
+    setAnalysisId(null);
     setActiveTab("summary");
   };
 
