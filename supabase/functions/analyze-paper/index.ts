@@ -173,6 +173,11 @@ Question: ${question}`;
       return new Response(JSON.stringify({ error: "Failed to parse analysis" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    } else if (action === "translate") {
+      const translation = data.choices?.[0]?.message?.content || "";
+      return new Response(JSON.stringify({ translation }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     } else {
       const answer = data.choices?.[0]?.message?.content || "No answer generated.";
       return new Response(JSON.stringify({ answer }), {
