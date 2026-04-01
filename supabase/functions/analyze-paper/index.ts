@@ -62,6 +62,11 @@ Paper text:
 ${truncatedText}
 
 Question: ${question}`;
+    } else if (action === "translate") {
+      const { targetLanguage } = await req.json().catch(() => ({ targetLanguage: "Urdu" }));
+      const tLang = targetLanguage || "Urdu";
+      systemPrompt = `You are a professional translator. Translate the following text to ${tLang}. Maintain the structure, meaning, and academic tone. Return ONLY the translated text.`;
+      userPrompt = truncatedText;
     } else {
       return new Response(JSON.stringify({ error: "Invalid action" }), {
         status: 400,

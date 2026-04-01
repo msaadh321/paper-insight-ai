@@ -148,26 +148,12 @@ export function AnalysisCharts({ analysis }: AnalysisChartsProps) {
               data={wordCloudData}
               dataKey="size"
               stroke="hsl(var(--background))"
-              content={({ x, y, width, height, name, fill }: any) => {
-                if (width < 30 || height < 20) return null;
-                return (
-                  <g>
-                    <rect x={x} y={y} width={width} height={height} rx={4} fill={fill} fillOpacity={0.2} stroke={fill} strokeWidth={1} />
-                    <text
-                      x={x + width / 2}
-                      y={y + height / 2}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill={fill}
-                      fontSize={Math.min(width / (name?.length || 5) * 1.4, 14, height * 0.5)}
-                      fontWeight={600}
-                    >
-                      {name}
-                    </text>
-                  </g>
-                );
-              }}
-            />
+            >
+              {wordCloudData.map((entry, i) => (
+                <Cell key={i} fill={entry.fill} fillOpacity={0.3} stroke={entry.fill} />
+              ))}
+              <Tooltip contentStyle={tooltipStyle} />
+            </Treemap>
           </ResponsiveContainer>
         </div>
       </div>
