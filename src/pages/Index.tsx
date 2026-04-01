@@ -206,7 +206,7 @@ const Index = () => {
             </div>
 
             {activeTab === "summary" && <SummarySection analysis={analysis} />}
-            {activeTab === "insights" && <InsightsSection analysis={analysis} />}
+            {activeTab === "insights" && <InsightsSection analysis={analysis} analysisId={analysisId || undefined} />}
             {activeTab === "charts" && <AnalysisCharts analysis={analysis} />}
             {activeTab === "qa" && paperText && <QASection paperText={paperText} />}
           </div>
