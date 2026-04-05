@@ -1,6 +1,7 @@
 import type { PaperAnalysis } from "@/types/paper";
 import { FileText, AlignLeft } from "lucide-react";
 import { useState } from "react";
+import { TextToSpeech } from "@/components/TextToSpeech";
 
 interface SummarySectionProps {
   analysis: PaperAnalysis;
@@ -8,6 +9,7 @@ interface SummarySectionProps {
 
 export function SummarySection({ analysis }: SummarySectionProps) {
   const [showDetailed, setShowDetailed] = useState(false);
+  const currentText = showDetailed ? analysis.detailedSummary : analysis.shortSummary;
 
   return (
     <div className="glass-card rounded-xl p-6 animate-slide-up space-y-4">
@@ -18,17 +20,20 @@ export function SummarySection({ analysis }: SummarySectionProps) {
           </div>
           <h2 className="font-display text-xl text-foreground">Summary</h2>
         </div>
-        <button
-          onClick={() => setShowDetailed(!showDetailed)}
-          className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-        >
-          <AlignLeft className="h-4 w-4" />
-          {showDetailed ? "Short" : "Detailed"}
-        </button>
+        <div className="flex items-center gap-3">
+          <TextToSpeech text={currentText} label="Listen" />
+          <button
+            onClick={() => setShowDetailed(!showDetailed)}
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            <AlignLeft className="h-4 w-4" />
+            {showDetailed ? "Short" : "Detailed"}
+          </button>
+        </div>
       </div>
 
       <p className="text-muted-foreground leading-relaxed text-sm">
-        {showDetailed ? analysis.detailedSummary : analysis.shortSummary}
+        {currentText}
       </p>
     </div>
   );
