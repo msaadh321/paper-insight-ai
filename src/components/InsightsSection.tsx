@@ -3,6 +3,7 @@ import type { PaperAnalysis } from "@/types/paper";
 import { BookOpen, FlaskConical, Target, CheckCircle, Lightbulb, FileText } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AnalysisComments } from "@/components/AnalysisComments";
+import { TextToSpeech } from "@/components/TextToSpeech";
 import { useAuth } from "@/hooks/useAuth";
 
 interface InsightsSectionProps {
