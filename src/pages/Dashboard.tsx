@@ -5,11 +5,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { CollectionsManager } from "@/components/CollectionsManager";
+import { DashboardStats } from "@/components/DashboardStats";
+import { ActivityCharts } from "@/components/ActivityCharts";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 import {
-  GraduationCap, LogOut, ArrowLeft, Trash2, FileText, Clock,
-  BarChart3, Loader2, BookOpen, Pencil, Check, X,
+  GraduationCap, LogOut, ArrowLeft, Loader2, Pencil, Check, X, Plus,
 } from "lucide-react";
 
 interface SavedAnalysis {
@@ -28,6 +30,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<{ display_name: string | null; email: string | null; avatar_url: string | null } | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
+  const [activeSection, setActiveSection] = useState<"overview" | "history" | "collections">("overview");
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -79,40 +82,45 @@ const Dashboard = () => {
     );
   }
 
-  const totalAnalyses = analyses.length;
-  const totalKeywords = analyses.reduce((sum, a) => sum + (a.analysis?.keywords?.length || 0), 0);
-  const latestDate = analyses.length ? new Date(analyses[0].created_at).toLocaleDateString() : "N/A";
+  const sections = [
+    { key: "overview" as const, label: "Overview" },
+    { key: "history" as const, label: "History" },
+    { key: "collections" as const, label: "Collections" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl gradient-gold shadow-gold">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+              <GraduationCap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="font-display text-xl text-foreground">Dashboard</h1>
-              <p className="text-xs text-muted-foreground">Your research hub</p>
-            </div>
+            <h1 className="font-display text-lg text-foreground">Dashboard</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/")} className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">New Analysis</span>
+            </button>
+            <button onClick={() => navigate("/")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Analyze</span>
             </button>
             <ThemeToggle />
-            <button onClick={() => { signOut(); toast.success("Signed out"); navigate("/auth"); }} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => { signOut(); toast.success("Signed out"); navigate("/auth"); }} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Profile Card */}
-        <section className="glass-card rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <section className="glass-card rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <AvatarUpload
             avatarUrl={profile?.avatar_url || null}
             displayName={profile?.display_name || null}
@@ -139,71 +147,56 @@ const Dashboard = () => {
               ) : (
                 <>
                   <h2 className="font-display text-xl text-foreground">{profile?.display_name || "Researcher"}</h2>
-                  <button onClick={() => { setNewName(profile?.display_name || ""); setEditingName(true); }} className="p-1 text-muted-foreground hover:text-primary transition-colors" title="Edit display name">
+                  <button onClick={() => { setNewName(profile?.display_name || ""); setEditingName(true); }} className="p-1 text-muted-foreground hover:text-primary transition-colors">
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                 </>
               )}
             </div>
             <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
-            <p className="text-xs text-muted-foreground mt-1">Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
+            </p>
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { icon: FileText, label: "Total Analyses", value: totalAnalyses },
-            { icon: BarChart3, label: "Keywords Extracted", value: totalKeywords },
-            { icon: Clock, label: "Last Analysis", value: latestDate },
-          ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="glass-card rounded-xl p-5 flex items-center gap-4">
-              <div className="p-2.5 rounded-lg bg-primary/10"><Icon className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-2xl font-display text-foreground">{value}</p>
-                <p className="text-xs text-muted-foreground">{label}</p>
-              </div>
-            </div>
+        {/* Section Tabs */}
+        <div className="flex gap-1 bg-accent/50 rounded-lg p-1 w-fit">
+          {sections.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setActiveSection(s.key)}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                activeSection === s.key
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {s.label}
+            </button>
           ))}
-        </section>
+        </div>
+
+        {/* Overview */}
+        {activeSection === "overview" && (
+          <div className="space-y-6">
+            <DashboardStats analyses={analyses} />
+            <ActivityCharts analyses={analyses} />
+          </div>
+        )}
+
+        {/* History */}
+        {activeSection === "history" && (
+          <AnalysisHistory
+            analyses={analyses}
+            onLoad={handleLoadAnalysis}
+            onDelete={handleDelete}
+            onNavigateToAnalyze={() => navigate("/")}
+          />
+        )}
 
         {/* Collections */}
-        <section>
-          <CollectionsManager />
-        </section>
-
-        {/* Saved Analyses */}
-        <section>
-          <h3 className="font-display text-lg text-foreground flex items-center gap-2 mb-4">
-            <BookOpen className="h-5 w-5 text-primary" />
-            Saved Analyses
-          </h3>
-          {analyses.length === 0 ? (
-            <div className="glass-card rounded-xl p-10 text-center">
-              <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-foreground font-medium">No saved analyses yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Go to the analyzer, paste a paper, and save the results.</p>
-              <button onClick={() => navigate("/")} className="mt-4 text-sm text-primary hover:underline font-medium">Start analyzing →</button>
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              {analyses.map((a) => (
-                <div key={a.id} onClick={() => handleLoadAnalysis(a)} className="glass-card rounded-xl p-4 flex items-center justify-between group cursor-pointer hover:border-primary/30 transition-colors">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{a.title}</p>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{new Date(a.created_at).toLocaleDateString()}</span>
-                      {a.analysis?.keywords?.length > 0 && <span>{a.analysis.keywords.length} keywords</span>}
-                    </div>
-                  </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleDelete(a.id); }} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        {activeSection === "collections" && <CollectionsManager />}
       </main>
 
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-auto">

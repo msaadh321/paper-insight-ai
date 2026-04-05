@@ -3,6 +3,7 @@ import type { PaperAnalysis } from "@/types/paper";
 import { BookOpen, FlaskConical, Target, CheckCircle, Lightbulb, FileText } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AnalysisComments } from "@/components/AnalysisComments";
+import { TextToSpeech } from "@/components/TextToSpeech";
 import { useAuth } from "@/hooks/useAuth";
 
 interface InsightsSectionProps {
@@ -42,12 +43,15 @@ export function InsightsSection({ analysis, analysisId }: InsightsSectionProps) 
               </div>
               <h3 className="font-display text-lg text-foreground">{label}</h3>
             </div>
-            <LanguageToggle
-              text={analysis[key]}
-              onTranslated={(translated, lang) =>
-                setTranslations((prev) => ({ ...prev, [key]: { text: translated, lang } }))
-              }
-            />
+            <div className="flex items-center gap-2">
+              <TextToSpeech text={getDisplayText(key, analysis[key])} label="" />
+              <LanguageToggle
+                text={analysis[key]}
+                onTranslated={(translated, lang) =>
+                  setTranslations((prev) => ({ ...prev, [key]: { text: translated, lang } }))
+                }
+              />
+            </div>
           </div>
           <p className={`text-sm leading-relaxed ${
             translations[key]?.lang === "ur" ? "text-right font-[Noto_Naskh_Arabic] text-foreground" : "text-muted-foreground"
