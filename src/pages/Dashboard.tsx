@@ -8,10 +8,11 @@ import { CollectionsManager } from "@/components/CollectionsManager";
 import { DashboardStats } from "@/components/DashboardStats";
 import { ActivityCharts } from "@/components/ActivityCharts";
 import { AnalysisHistory } from "@/components/AnalysisHistory";
+import { RecentActivityFeed, useActivityCount } from "@/components/RecentActivityFeed";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 import {
-  GraduationCap, LogOut, ArrowLeft, Loader2, Pencil, Check, X, Plus,
+  GraduationCap, LogOut, ArrowLeft, Loader2, Pencil, Check, X, Plus, Bell,
 } from "lucide-react";
 
 interface SavedAnalysis {
@@ -30,7 +31,8 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<{ display_name: string | null; email: string | null; avatar_url: string | null } | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
-  const [activeSection, setActiveSection] = useState<"overview" | "history" | "collections">("overview");
+  const [activeSection, setActiveSection] = useState<"overview" | "history" | "collections" | "activity">("overview");
+  const activityCount = useActivityCount();
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -83,9 +85,10 @@ const Dashboard = () => {
   }
 
   const sections = [
-    { key: "overview" as const, label: "Overview" },
-    { key: "history" as const, label: "History" },
-    { key: "collections" as const, label: "Collections" },
+    { key: "overview" as const, label: "Overview", badge: 0 },
+    { key: "history" as const, label: "History", badge: analyses.length },
+    { key: "collections" as const, label: "Collections", badge: 0 },
+    { key: "activity" as const, label: "Activity", badge: activityCount },
   ];
 
   return (
@@ -106,6 +109,18 @@ const Dashboard = () => {
             >
               <Plus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">New Analysis</span>
+            </button>
+            {/* Notification bell */}
+            <button
+              onClick={() => setActiveSection("activity")}
+              className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Bell className="h-4 w-4" />
+              {activityCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full text-[10px] font-bold bg-destructive text-destructive-foreground">
+                  {activityCount > 99 ? "99+" : activityCount}
+                </span>
+              )}
             </button>
             <button onClick={() => navigate("/")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" />
@@ -161,18 +176,23 @@ const Dashboard = () => {
         </section>
 
         {/* Section Tabs */}
-        <div className="flex gap-1 bg-accent/50 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 bg-accent/50 rounded-lg p-1 w-fit flex-wrap">
           {sections.map((s) => (
             <button
               key={s.key}
               onClick={() => setActiveSection(s.key)}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`relative px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 activeSection === s.key
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {s.label}
+              {s.badge > 0 && activeSection !== s.key && (
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-destructive text-destructive-foreground">
+                  {s.badge > 99 ? "99+" : s.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -181,7 +201,12 @@ const Dashboard = () => {
         {activeSection === "overview" && (
           <div className="space-y-6">
             <DashboardStats analyses={analyses} />
-            <ActivityCharts analyses={analyses} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2">
+                <ActivityCharts analyses={analyses} />
+              </div>
+              <RecentActivityFeed />
+            </div>
           </div>
         )}
 
@@ -197,12 +222,17 @@ const Dashboard = () => {
 
         {/* Collections */}
         {activeSection === "collections" && <CollectionsManager />}
+
+        {/* Activity */}
+        {activeSection === "activity" && (
+          <RecentActivityFeed className="max-w-2xl" />
+        )}
       </main>
 
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-auto">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} Climbart Tech. All rights reserved.</p>
-          <p>ResearchLens v1.0.0 — AI-Powered Paper Analysis</p>
+          <p>ResearchLens v2.0.0 — AI-Powered Paper Analysis</p>
         </div>
       </footer>
     </div>
