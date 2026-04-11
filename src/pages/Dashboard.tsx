@@ -94,8 +94,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <a href="#dashboard-main" className="skip-link">Skip to main content</a>
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10" role="banner">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl gradient-gold shadow-gold">
@@ -134,7 +135,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <main id="dashboard-main" className="max-w-6xl mx-auto px-4 py-6 space-y-6" role="main">
         {/* Profile Card */}
         <section className="glass-card rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <AvatarUpload
@@ -177,7 +178,7 @@ const Dashboard = () => {
         </section>
 
         {/* Section Tabs */}
-        <div className="flex gap-1 bg-accent/50 rounded-lg p-1 w-fit flex-wrap">
+        <nav className="flex gap-1 bg-accent/50 rounded-lg p-1 w-fit flex-wrap" role="tablist" aria-label="Dashboard sections">
           {sections.map((s) => (
             <button
               key={s.key}
