@@ -208,6 +208,7 @@ const Dashboard = () => {
               </div>
               <RecentActivityFeed />
             </div>
+            <PaperRecommendations hasAnalyses={analyses.length > 0} />
           </div>
         )}
 
