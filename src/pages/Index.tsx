@@ -93,7 +93,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10" role="banner">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl gradient-gold shadow-gold">
@@ -162,7 +163,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main id="main-content" className="max-w-5xl mx-auto px-4 py-8" role="main">
         {!analysis && !loading && (
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8 animate-fade-in">

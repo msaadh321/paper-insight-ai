@@ -91,6 +91,80 @@
     --navy: 220 25% 12%;
     --navy-light: 220 20% 22%;
   }
+
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 220 100% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 25%;
+
+    --accent: 0 0% 93%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --ring: 220 100% 40%;
+
+    --surface: 0 0% 98%;
+    --surface-foreground: 0 0% 0%;
+    --gold: 220 100% 40%;
+    --gold-light: 220 80% 55%;
+    --navy: 0 0% 0%;
+    --navy-light: 0 0% 20%;
+  }
+
+  .high-contrast.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 50 100% 60%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 75%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 100% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 100%;
+    --input: 0 0% 100%;
+    --ring: 50 100% 60%;
+
+    --surface: 0 0% 3%;
+    --surface-foreground: 0 0% 100%;
+    --gold: 50 100% 60%;
+    --gold-light: 50 80% 70%;
+    --navy: 0 0% 100%;
+    --navy-light: 0 0% 80%;
+  }
 }
 
 @layer base {
@@ -104,6 +178,19 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  /* Focus visible for keyboard navigation */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring rounded-sm;
+  }
+
+  /* Skip to content link */
+  .skip-link {
+    @apply absolute -top-10 left-4 z-50 px-4 py-2 bg-primary text-primary-foreground rounded-b-lg font-medium text-sm transition-all;
+  }
+  .skip-link:focus {
+    @apply top-0;
   }
 }
 
