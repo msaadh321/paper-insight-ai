@@ -163,7 +163,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main id="main-content" className="max-w-5xl mx-auto px-4 py-8" role="main">
         {!analysis && !loading && (
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8 animate-fade-in">
