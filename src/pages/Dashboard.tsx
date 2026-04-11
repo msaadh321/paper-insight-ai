@@ -10,6 +10,7 @@ import { ActivityCharts } from "@/components/ActivityCharts";
 import { AnalysisHistory } from "@/components/AnalysisHistory";
 import { PaperRecommendations } from "@/components/PaperRecommendations";
 import { RecentActivityFeed, useActivityCount } from "@/components/RecentActivityFeed";
+import { TeamManager } from "@/components/TeamManager";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
 import {
@@ -32,7 +33,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<{ display_name: string | null; email: string | null; avatar_url: string | null } | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
-  const [activeSection, setActiveSection] = useState<"overview" | "history" | "collections" | "activity">("overview");
+  const [activeSection, setActiveSection] = useState<"overview" | "history" | "collections" | "teams" | "activity">("overview");
   const activityCount = useActivityCount();
 
   useEffect(() => {
@@ -89,6 +90,7 @@ const Dashboard = () => {
     { key: "overview" as const, label: "Overview", badge: 0 },
     { key: "history" as const, label: "History", badge: analyses.length },
     { key: "collections" as const, label: "Collections", badge: 0 },
+    { key: "teams" as const, label: "Teams", badge: 0 },
     { key: "activity" as const, label: "Activity", badge: activityCount },
   ];
 
@@ -228,6 +230,9 @@ const Dashboard = () => {
 
         {/* Collections */}
         {activeSection === "collections" && <CollectionsManager />}
+
+        {/* Teams */}
+        {activeSection === "teams" && <TeamManager />}
 
         {/* Activity */}
         {activeSection === "activity" && (
