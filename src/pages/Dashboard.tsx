@@ -8,6 +8,7 @@ import { CollectionsManager } from "@/components/CollectionsManager";
 import { DashboardStats } from "@/components/DashboardStats";
 import { ActivityCharts } from "@/components/ActivityCharts";
 import { AnalysisHistory } from "@/components/AnalysisHistory";
+import { PaperRecommendations } from "@/components/PaperRecommendations";
 import { RecentActivityFeed, useActivityCount } from "@/components/RecentActivityFeed";
 import type { PaperAnalysis } from "@/types/paper";
 import { toast } from "sonner";
@@ -207,6 +208,7 @@ const Dashboard = () => {
               </div>
               <RecentActivityFeed />
             </div>
+            <PaperRecommendations hasAnalyses={analyses.length > 0} />
           </div>
         )}
 
