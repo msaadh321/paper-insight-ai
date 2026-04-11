@@ -182,6 +182,9 @@ const Dashboard = () => {
           {sections.map((s) => (
             <button
               key={s.key}
+              role="tab"
+              aria-selected={activeSection === s.key}
+              aria-controls={`panel-${s.key}`}
               onClick={() => setActiveSection(s.key)}
               className={`relative px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 activeSection === s.key
@@ -191,13 +194,13 @@ const Dashboard = () => {
             >
               {s.label}
               {s.badge > 0 && activeSection !== s.key && (
-                <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-destructive text-destructive-foreground">
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-destructive text-destructive-foreground" aria-label={`${s.badge} items`}>
                   {s.badge > 99 ? "99+" : s.badge}
                 </span>
               )}
             </button>
           ))}
-        </div>
+        </nav>
 
         {/* Overview */}
         {activeSection === "overview" && (
